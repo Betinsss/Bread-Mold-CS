@@ -9,7 +9,7 @@ import tempfile
 # === Load local YOLO model (.pt file) ===
 MODEL_PATH = "bread_mold_webapp/my_model.pt"   # <- change to your model filename
 model = YOLO(MODEL_PATH)
-# ==========================================
+# ==============================================
 
 app = Flask(__name__)
 
