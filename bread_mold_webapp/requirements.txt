@@ -1,5 +1,13 @@
+<<<<<<< HEAD
 Flask>=2.0.0
 roboflow>=0.2.27
 Pillow>=8.0.0
 opencv-python-headless>=4.5.0
 ultralytics>=8.0.0
+=======
+Flask
+roboflow
+Pillow
+opencv-python-headless
+ultralytics
+>>>>>>> b199761580503b4b1daa18b8446aaef705066173
