@@ -1,0 +1,217 @@
+<!--
+Simple Mold Detector (single-file)
+File: mold_detector_index.html
+How to run:
+1. Save this file as `mold_detector_index.html` in a folder.
+2. Open the file in VS Code. Install the "Live Server" extension (optional) and click "Go Live" to run, or just open the file in a browser.
+
+What it does:
+- Allows you to upload a bread photo.
+- Runs a simple client-side image analysis (no server required) to detect mold-like regions using basic color/brightness heuristics.
+- Shows original image, result overlay, percent of pixels flagged, a pass/fail result, and lets you download an annotated image.
+
+Notes:
+- This is a simple heuristic demo for prototyping and education. For production accuracy, replace the heuristic with a trained model (TensorFlow/PyTorch) and run inference on the server or use TF.js in-browser.
+- You can tweak thresholds using the controls on the page.
+-->
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mold Detector — Bread Analyzer</title>
+  <style>
+    :root{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; color:#111}
+    body{max-width:980px;margin:28px auto;padding:18px;background:#f7fafc;border-radius:10px}
+    h1{margin:0 0 12px;font-size:22px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .card{background:#fff;padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(12,15,20,0.06)}
+    canvas{max-width:100%;border-radius:6px;border:1px solid #e6e9ee}
+    .controls{display:flex;flex-direction:column;gap:8px}
+    label{font-size:13px;color:#333}
+    input[type="range"]{width:100%}
+    button{background:#0b61ff;color:#fff;border:0;padding:8px 12px;border-radius:8px;cursor:pointer}
+    .small{font-size:13px;color:#555}
+    .result{font-weight:700;font-size:18px}
+    .bad{color:#c92a2a}
+    .good{color:#15803d}
+    .row{display:flex;gap:8px;align-items:center}
+    @media(max-width:780px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <h1>Mold Detector — Bread Analyzer (Demo)</h1>
+  <p class="small">Upload a photo of bread. The page will analyze for mold-like colors/spots using a simple client-side heuristic. For reliable results, replace this heuristic with a trained model.</p>
+
+  <div class="grid">
+    <div class="card">
+      <div class="controls">
+        <label class="small">Upload image</label>
+        <input id="fileInput" type="file" accept="image/*" />
+
+        <label class="small">Mold sensitivity (lower = easier to detect)</label>
+        <input id="sensitivity" type="range" min="0" max="200" value="100" />
+        <div class="row"><span class="small">Sensitivity:</span><span id="sensitivityVal" class="small">100</span></div>
+
+        <label class="small">Minimum % flagged pixels to mark as "MOLD DETECTED"</label>
+        <input id="minPercent" type="range" min="0" max="10" step="0.1" value="0.5" />
+        <div class="row"><span class="small">Threshold:</span><span id="minPercentVal" class="small">0.5%</span></div>
+
+        <div class="row" style="margin-top:6px">
+          <button id="analyzeBtn">Analyze</button>
+          <button id="downloadBtn" disabled>Download Annotated</button>
+        </div>
+
+        <p class="small" style="margin-top:8px">Result: <span id="resultText" class="result">—</span></p>
+        <p class="small">Flagged pixels: <span id="flaggedCount">0</span> / <span id="totalCount">0</span> (<span id="flaggedPct">0%</span>)</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div>
+          <div class="small">Original image</div>
+          <canvas id="origCanvas" width="640" height="480"></canvas>
+        </div>
+        <div>
+          <div class="small">Analysis overlay (red = mold-like pixels)</div>
+          <canvas id="overlayCanvas" width="640" height="480"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const fileInput = document.getElementById('fileInput');
+const origCanvas = document.getElementById('origCanvas');
+const overlayCanvas = document.getElementById('overlayCanvas');
+const analyzeBtn = document.getElementById('analyzeBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const resultText = document.getElementById('resultText');
+const flaggedCountEl = document.getElementById('flaggedCount');
+const totalCountEl = document.getElementById('totalCount');
+const flaggedPctEl = document.getElementById('flaggedPct');
+const sensitivity = document.getElementById('sensitivity');
+const sensitivityVal = document.getElementById('sensitivityVal');
+const minPercent = document.getElementById('minPercent');
+const minPercentVal = document.getElementById('minPercentVal');
+
+let currentImage = null;
+
+function fitCanvasToImage(canvas, img){
+  const maxW = 640; const maxH = 480;
+  let w = img.width, h = img.height;
+  const ratio = Math.min(maxW/w, maxH/h, 1);
+  w = Math.round(w*ratio); h = Math.round(h*ratio);
+  canvas.width = w; canvas.height = h;
+}
+
+fileInput.addEventListener('change', (e)=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  const url = URL.createObjectURL(f);
+  const img = new Image();
+  img.onload = ()=>{
+    currentImage = img;
+    fitCanvasToImage(origCanvas, img);
+    fitCanvasToImage(overlayCanvas, img);
+    const ctx = origCanvas.getContext('2d');
+    ctx.clearRect(0,0,origCanvas.width,origCanvas.height);
+    ctx.drawImage(img,0,0,origCanvas.width,origCanvas.height);
+    // clear overlay
+    const octx = overlayCanvas.getContext('2d');
+    octx.clearRect(0,0,overlayCanvas.width,overlayCanvas.height);
+    resultText.textContent = '—';
+    downloadBtn.disabled = true;
+  };
+  img.src = url;
+});
+
+sensitivity.addEventListener('input', ()=>{sensitivityVal.textContent = sensitivity.value});
+minPercent.addEventListener('input', ()=>{minPercentVal.textContent = minPercent.value + '%'});
+
+function analyzeImage(){
+  if(!currentImage){alert('Please upload an image first');return}
+  const w = origCanvas.width, h = origCanvas.height;
+  const ctx = origCanvas.getContext('2d');
+  const imgData = ctx.getImageData(0,0,w,h);
+  const data = imgData.data;
+  const overlay = overlayCanvas.getContext('2d');
+  overlay.clearRect(0,0,w,h);
+
+  // Create mask image data to draw red pixels where mold-like
+  const mask = overlay.createImageData(w,h);
+  let flagged = 0;
+  const sens = Number(sensitivity.value);
+
+  for(let i=0;i<data.length;i+=4){
+    const r = data[i], g = data[i+1], b = data[i+2];
+    // simple heuristics for mold-like colors:
+    // - greenish: g significantly higher than r and b
+    // - dark/black spots: low brightness
+    // - bluish/gray or fuzzy darks also possible
+    const brightness = (r+g+b)/3;
+
+    // adjustable sensitivity influences how strict the green test is
+    const greenTest = (g > r + Math.max(20, Math.round(sens/5))) && (g > b + Math.max(20, Math.round(sens/5))) && g > 60;
+    const darkTest = brightness < Math.max(60, 140 - sens); // as sens increases, dark threshold relaxes
+
+    // also test for bluish-gray/olive shades
+    const oliveTest = (g > 60 && r > 40 && b < 80 && g > b + 10);
+
+    const isMold = greenTest || darkTest || oliveTest;
+    if(isMold){
+      // mark red in mask with some transparency
+      mask.data[i] = 255; // red
+      mask.data[i+1] = 0;
+      mask.data[i+2] = 0;
+      mask.data[i+3] = 180; // alpha
+      flagged++;
+    } else {
+      // transparent
+      mask.data[i] = 0; mask.data[i+1] = 0; mask.data[i+2] = 0; mask.data[i+3] = 0;
+    }
+  }
+
+  overlay.putImageData(mask, 0, 0);
+
+  const total = w*h;
+  const pct = (flagged/total)*100;
+  flaggedCountEl.textContent = flagged.toLocaleString();
+  totalCountEl.textContent = total.toLocaleString();
+  flaggedPctEl.textContent = pct.toFixed(3) + '%';
+
+  // Decide result using threshold
+  const threshold = Number(minPercent.value);
+  if(pct >= threshold){
+    resultText.textContent = 'MOLD DETECTED';
+    resultText.classList.remove('good'); resultText.classList.add('bad');
+  } else {
+    resultText.textContent = 'No obvious mold detected (heuristic)';
+    resultText.classList.remove('bad'); resultText.classList.add('good');
+  }
+
+  downloadBtn.disabled = false;
+}
+
+analyzeBtn.addEventListener('click', analyzeImage);
+
+downloadBtn.addEventListener('click', ()=>{
+  // compose annotated image by drawing original then overlay into a temp canvas
+  const w = origCanvas.width, h = origCanvas.height;
+  const temp = document.createElement('canvas'); temp.width = w; temp.height = h;
+  const tctx = temp.getContext('2d');
+  tctx.drawImage(origCanvas,0,0);
+  tctx.drawImage(overlayCanvas,0,0);
+  const link = document.createElement('a');
+  link.download = 'bread_analysis_annotated.png';
+  link.href = temp.toDataURL('image/png');
+  link.click();
+});
+
+// convenience: allow pressing Enter to analyze
+fileInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') analyzeImage(); });
+</script>
+</body>
+</html>
