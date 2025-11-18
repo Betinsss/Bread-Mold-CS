@@ -5,11 +5,59 @@ from ultralytics import YOLO
 from PIL import Image, ImageDraw
 import base64
 import tempfile
+import torch
+
+# Handle PyTorch 2.6+ security changes for loading models
+# Add safe globals for ultralytics models and their dependencies
+try:
+    from ultralytics.nn.tasks import DetectionModel
+    torch.serialization.add_safe_globals([DetectionModel])
+except ImportError:
+    pass
+
+try:
+    # Add specific modules that may be needed by the model
+    import ultralytics.nn.modules.conv
+    import ultralytics.nn.modules.block
+    import ultralytics.nn.modules.head
+    # Add them to safe globals if they exist
+    torch.serialization.add_safe_globals([
+        ultralytics.nn.modules.conv.Conv,
+        ultralytics.nn.modules.block.C2f,
+        ultralytics.nn.modules.head.Detect,
+        ultralytics.nn.modules.block.Bottleneck
+    ])
+except ImportError:
+    pass
+
+try:
+    # Also add torch.nn modules that might be needed
+    from torch.nn.modules.container import Sequential
+    from torch.nn.modules.activation import SiLU, Sigmoid
+    from torch.nn.modules.pooling import MaxPool2d
+    from torch.nn.modules.linear import Linear
+    from torch.nn.modules.normalization import BatchNorm2d
+    torch.serialization.add_safe_globals([Sequential, SiLU, Sigmoid, MaxPool2d, Linear, BatchNorm2d])
+except ImportError:
+    pass
+
+# Additional modules that might be needed
+try:
+    torch.serialization.add_safe_globals([
+        torch.nn.modules.container.Sequential
+    ])
+except AttributeError:
+    pass
 
 # === Load local YOLO model (.pt file) ===
-MODEL_PATH = "bread_mold_webapp\my_model.pt"   # <- change to your model filename
+# ...existing code...
+# === Load local YOLO model (.pt file) ===
+# use model file located next to this script
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "my_model.pt")
 model = YOLO(MODEL_PATH)
-# ==========================================
+# ==============================================
+
+# ==============================================
 
 app = Flask(__name__)
 
