@@ -1,7 +1,7 @@
 /* Professional Bread Mold Computer Vision Theme - Brown Shades */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #d2b48c 0%, #c19a6b 100%);
+  background: linear-gradient(135deg, #8B4513 0%, #5D2906 100%);
   margin: 0;
   padding: 20px;
   min-height: 100vh;
@@ -96,6 +96,13 @@ img {
   box-shadow: 0 4px 8px rgba(139, 69, 19, 0.15);
 }
 
+#result img {
+  max-width: 300px;
+  margin-top: 0;
+  align-self: flex-start;
+  flex-shrink: 0;
+}
+
 #loading {
   font-style: italic;
  color: #8b4513;
@@ -113,6 +120,15 @@ img {
   background: #f9f5eb;
   border-radius: 8px;
   border: 1px solid #d2b48c;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+#result-content {
+  flex: 1;
+  min-width: 0;
 }
 
 #result h2 {

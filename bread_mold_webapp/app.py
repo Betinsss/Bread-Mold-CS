@@ -7,7 +7,7 @@ import base64
 import tempfile
 
 # === Load local YOLO model (.pt file) ===
-MODEL_PATH = "../Bread-Mold-CS-main/bread_mold_webapp/my_model.pt"   # <- change to your model filename
+MODEL_PATH = "bread_mold_webapp\my_model.pt"   # <- change to your model filename
 model = YOLO(MODEL_PATH)
 # ==========================================
 
@@ -42,26 +42,38 @@ def analyze():
 
     detections = results[0].boxes
 
+    # Create a mask to accurately calculate mold coverage without overlapping areas
+    mold_mask = Image.new('L', (w, h), 0)
+    mask_draw = ImageDraw.Draw(mold_mask)
+
     for box in detections:
         cls_id = int(box.cls[0])
         cls_name = model.names[cls_id]
         conf = float(box.conf[0])
 
         x1, y1, x2, y2 = box.xyxy[0]
-        x1, y1, x2, y2 = map(float, [x1, y1, x2, y2])
+        x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])  # Convert to int for pixel operations
 
         color = (255, 0, 0) if "mold" in cls_name.lower() else (0, 120, 255)
         draw.rectangle([x1, y1, x2, y2], outline=color, width=3)
         draw.text((x1, y1 - 10), f"{cls_name} {conf*100:.1f}%", fill=color)
 
         if "mold" in cls_name.lower():
-            mold_area += (x2 - x1) * (y2 - y1)
+            # Fill the mold area in the mask to prevent double counting overlapping regions
+            mask_draw.rectangle([x1, y1, x2, y2], fill=255)
+
+    # Count the number of pixels in the mold mask to get accurate area
+    mold_pixels = sum(mold_mask.getpixel((x, y)) > 0 for x in range(w) for y in range(h))
+    mold_area = mold_pixels
 
     # Cleanup temp file
     os.unlink(temp.name)
 
-    coverage_ratio = mold_area / bread_area
-    if coverage_ratio < 0.1:
+    coverage_ratio = min(mold_area / bread_area, 1.0)  # Cap at 100%
+    if coverage_ratio == 0:
+        risk = "None"
+        action = "Safe to eat"
+    elif coverage_ratio < 0.1:
         risk = "Low"
         action = "Safe to remove moldy part carefully."
     elif coverage_ratio < 0.3:
