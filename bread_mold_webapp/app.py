@@ -6,16 +6,27 @@ from PIL import Image, ImageDraw
 import base64
 import tempfile
 import torch
-from torch.hub import load_state_dict_from_url
 
 # Handle PyTorch 2.6+ security changes for loading models
 # Add safe globals for ultralytics models and their dependencies
 try:
     from ultralytics.nn.tasks import DetectionModel
-    from ultralytics.nn.modules.conv import Conv, autopad
-    from ultralytics.nn.modules.block import C2f, Bottleneck
-    from ultralytics.nn.modules.head import Detect
-    torch.serialization.add_safe_globals([DetectionModel, Conv, C2f, Bottleneck, Detect])
+    torch.serialization.add_safe_globals([DetectionModel])
+except ImportError:
+    pass
+
+try:
+    # Add specific modules that may be needed by the model
+    import ultralytics.nn.modules.conv
+    import ultralytics.nn.modules.block
+    import ultralytics.nn.modules.head
+    # Add them to safe globals if they exist
+    torch.serialization.add_safe_globals([
+        ultralytics.nn.modules.conv.Conv,
+        ultralytics.nn.modules.block.C2f,
+        ultralytics.nn.modules.head.Detect,
+        ultralytics.nn.modules.block.Bottleneck
+    ])
 except ImportError:
     pass
 
@@ -30,29 +41,21 @@ try:
 except ImportError:
     pass
 
+# Additional modules that might be needed
+try:
+    torch.serialization.add_safe_globals([
+        torch.nn.modules.container.Sequential
+    ])
+except AttributeError:
+    pass
+
 # === Load local YOLO model (.pt file) ===
-MODEL_PATH = "bread_mold_webapp/my_model.pt"   # <- change to your model filename
-
-# Create a context where we temporarily allow unsafe loading for the model
-# This is a workaround for PyTorch 2.6+ security changes
-def load_model_with_weights_only_false(model_path):
-    original_torch_load = torch.load
-
-    def patched_torch_load(f, map_location=None, **kwargs):
-        kwargs['weights_only'] = False # Force weights_only to False
-        return original_torch_load(f, map_location=map_location, **kwargs)
-
-    # Temporarily replace torch.load
-    torch.load = patched_torch_load
-    try:
-        model = YOLO(model_path)
-    finally:
-        # Restore original torch.load
-        torch.load = original_torch_load
-
-    return model
-
-model = load_model_with_weights_only_false(MODEL_PATH)
+# ...existing code...
+# === Load local YOLO model (.pt file) ===
+# use model file located next to this script
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "my_model.pt")
+model = YOLO(MODEL_PATH)
+# ==============================================
 
 # ==============================================
 
