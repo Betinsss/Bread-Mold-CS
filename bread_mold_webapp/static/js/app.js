@@ -21,6 +21,18 @@ form.addEventListener("submit", async (e) => {
   document.getElementById("risk").innerText = data.risk;
   document.getElementById("coverage").innerText = data.coverage;
   document.getElementById("action").innerText = data.action;
+  
+  const verdictElement = document.getElementById("verdict");
+  verdictElement.innerText = data.verdict;
+  // Remove any existing verdict classes
+  verdictElement.classList.remove("healthy", "not-healthy");
+  // Add appropriate class based on verdict
+  if (data.verdict === "Healthy") {
+    verdictElement.classList.add("healthy");
+  } else if (data.verdict === "Not Healthy") {
+    verdictElement.classList.add("not-healthy");
+  }
+
   document.getElementById("annotated").src = data.annotated;
 
   loading.classList.add("hidden");

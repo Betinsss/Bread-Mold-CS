@@ -17,13 +17,18 @@
     <div id="loading" class="hidden">Analyzing, please wait...</div>
 
     <div id="result" class="hidden">
-      <div id="result-content">
-        <h2>Results</h2>
-        <p><strong>Risk Level:</strong> <span id="risk"></span></p>
-        <p><strong>Mold Coverage:</strong> <span id="coverage"></span>%</p>
-        <p><strong>Recommended Action:</strong> <span id="action"></span></p>
-      </div>
+      <h2>Results</h2>
       <img id="annotated" src="" alt="Annotated Result">
+      <div class="results-grid">
+        <div class="results-column">
+          <p><strong>Risk Level:</strong> <span id="risk"></span></p>
+          <p><strong>Mold Coverage:</strong> <span id="coverage"></span>%</p>
+        </div>
+        <div class="results-column">
+          <p><strong>Recommended Action:</strong> <span id="action"></span></p>
+          <p><strong>Final Verdict:</strong> <span id="verdict"></span></p>
+        </div>
+      </div>
     </div>
   </div>
 

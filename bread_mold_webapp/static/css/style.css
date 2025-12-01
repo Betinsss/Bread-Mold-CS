@@ -120,23 +120,36 @@ img {
   background: #f9f5eb;
   border-radius: 8px;
   border: 1px solid #d2b48c;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 20px;
-}
-
-#result-content {
-  flex: 1;
-  min-width: 0;
 }
 
 #result h2 {
   color: #8b4513;
+  margin-top: 0;
+}
+
+#result img {
+  max-width: 100%;
+  margin: 15px auto;
+  display: block;
+  border: 2px solid #c19a6b;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(139, 69, 19, 0.15);
+}
+
+.results-grid {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.results-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 #result p {
-  margin: 12px 0;
+  margin: 8px 0;
   padding: 8px 15px;
   background: rgba(255, 255, 255, 0.7);
   border-radius: 5px;
@@ -163,6 +176,18 @@ img {
   font-weight: bold;
   color: #8b4513;
   font-style: italic;
+}
+
+#verdict {
+  font-weight: bold;
+}
+
+#verdict.healthy {
+  color: green;
+}
+
+#verdict.not-healthy {
+  color: red;
 }
 
 /* Responsive design */

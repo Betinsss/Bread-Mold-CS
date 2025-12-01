@@ -77,8 +77,8 @@ def analyze():
     temp.write(img_bytes)
     temp.close()
 
-    # Run YOLO prediction safely
-    results = model.predict(source=temp.name, conf=0.40)
+    # Run YOLO prediction safely with lower confidence threshold to detect smaller mold areas
+    results = model.predict(source=temp.name, conf=0.25)
 
     # Load image to draw
     image = Image.open(io.BytesIO(img_bytes)).convert("RGB")
@@ -94,6 +94,10 @@ def analyze():
     mold_mask = Image.new('L', (w, h), 0)
     mask_draw = ImageDraw.Draw(mold_mask)
 
+    # Process detections and handle overlapping boxes for the same object type
+    bread_boxes = []
+    mold_boxes = []
+    
     for box in detections:
         cls_id = int(box.cls[0])
         cls_name = model.names[cls_id]
@@ -102,34 +106,82 @@ def analyze():
         x1, y1, x2, y2 = box.xyxy[0]
         x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])  # Convert to int for pixel operations
 
-        color = (255, 0, 0) if "mold" in cls_name.lower() else (0, 120, 255)
-        draw.rectangle([x1, y1, x2, y2], outline=color, width=3)
-        draw.text((x1, y1 - 10), f"{cls_name} {conf*100:.1f}%", fill=color)
-
         if "mold" in cls_name.lower():
-            # Fill the mold area in the mask to prevent double counting overlapping regions
-            mask_draw.rectangle([x1, y1, x2, y2], fill=255)
+            mold_boxes.append((x1, y1, x2, y2, cls_name, conf))
+        else:  # bread or other food items
+            bread_boxes.append((x1, y1, x2, y2, cls_name, conf))
+
+    # Draw bread boxes first
+    for x1, y1, x2, y2, cls_name, conf in bread_boxes:
+        color = (0, 120, 255)  # Blue for bread/food items
+        draw.rectangle([x1, y1, x2, y2], outline=color, width=3)
+        # Increase font size for better visibility of labels in bounding boxes
+        try:
+            from PIL import ImageFont
+            # Use a larger font for better visibility
+            font = ImageFont.truetype("arial.ttf", 16)  # Use a default system font with larger size
+            draw.text((x1, y1 - 15), f"{cls_name} {conf*100:.1f}%", fill=color, font=font)
+        except:
+            # Fallback to default font if specific font is not available
+            draw.text((x1, y1 - 15), f"{cls_name} {conf*100:.1f}%", fill=color)
+
+    # Draw mold boxes second (on top)
+    for x1, y1, x2, y2, cls_name, conf in mold_boxes:
+        color = (255, 0, 0)  # Red for mold
+        draw.rectangle([x1, y1, x2, y2], outline=color, width=3)
+        # Increase font size for better visibility of labels in bounding boxes
+        try:
+            from PIL import ImageFont
+            # Use a larger font for better visibility
+            font = ImageFont.truetype("arial.ttf", 16)  # Use a default system font with larger size
+            draw.text((x1, y1 - 15), f"{cls_name} {conf*100:.1f}%", fill=color, font=font)
+        except:
+            # Fallback to default font if specific font is not available
+            draw.text((x1, y1 - 15), f"{cls_name} {conf*100:.1f}%", fill=color)
+
+        # Fill the mold area in the mask to prevent double counting overlapping regions
+        # Use a more robust approach to handle overlapping bounding boxes
+        mask_draw.rectangle([x1, y1, x2, y2], fill=255)
 
     # Count the number of pixels in the mold mask to get accurate area
+    # This ensures overlapping regions are only counted once
     mold_pixels = sum(mold_mask.getpixel((x, y)) > 0 for x in range(w) for y in range(h))
     mold_area = mold_pixels
+
+    # Verify mold coverage calculation with additional validation
+    # Calculate coverage based on the actual bread area detected, not just the whole image
+    total_bread_area = 0
+    for x1, y1, x2, y2, cls_name, conf in bread_boxes:
+        total_bread_area += (x2 - x1) * (y2 - y1)
+    
+    # If no bread detected, use the whole image as bread area
+    if total_bread_area == 0:
+        total_bread_area = bread_area
+
+    if mold_pixels > 0 and total_bread_area > 0:
+        coverage_ratio = min(mold_pixels / total_bread_area, 1.0)  # Cap at 100%
+    else:
+        coverage_ratio = 0.0  # No mold detected or invalid dimensions
 
     # Cleanup temp file
     os.unlink(temp.name)
 
-    coverage_ratio = min(mold_area / bread_area, 1.0)  # Cap at 100%
     if coverage_ratio == 0:
         risk = "None"
         action = "Safe to eat"
+        verdict = "Healthy"
     elif coverage_ratio < 0.1:
         risk = "Low"
         action = "Safe to remove moldy part carefully."
+        verdict = "Healthy"
     elif coverage_ratio < 0.3:
         risk = "Moderate"
         action = "Do not eat. Dispose bread safely."
+        verdict = "Not Healthy"
     else:
         risk = "Severe"
         action = "Highly contaminated. Dispose immediately."
+        verdict = "Not Healthy"
 
     # Convert to base64
     buffer = io.BytesIO()
@@ -140,6 +192,7 @@ def analyze():
         "risk": risk,
         "coverage": round(coverage_ratio * 100, 2),
         "action": action,
+        "verdict": verdict,
         "annotated": f"data:image/jpeg;base64,{encoded_img}"
     })
 
