@@ -116,63 +116,31 @@ def analyze():
     bread_types = list(set([name for _, _, _, _, name, _ in bread_boxes])) if bread_boxes else ["Unknown"]
     mold_types = list(set([name for _, _, _, _, name, _ in mold_boxes])) if mold_boxes else ["None"]
     
-    # Mold information database
-    mold_info = {
-        "green_mold": {
-            "name": "Green Mold (Penicillium)",
-            "description": "Green mold is one of the most common types found on bread. It appears as fuzzy green or blue-green patches and spreads quickly in moist conditions.",
-            "health_risk": "Can cause allergic reactions and respiratory issues in sensitive individuals."
-        },
-        "black_mold": {
-            "name": "Black Mold (Rhizopus stolonifer)",
-            "description": "Black mold appears as dark spots or patches and is often accompanied by a musty odor. It thrives in warm, humid environments.",
-            "health_risk": "May produce mycotoxins that can cause digestive problems and allergic reactions."
-        },
-        "white_mold": {
-            "name": "White Mold (Mucor)",
-            "description": "White mold appears as fluffy white growth on bread surfaces. It's less common but can spread rapidly once established.",
-            "health_risk": "Can trigger allergies and respiratory problems, especially in immunocompromised individuals."
-        },
-        "default": {
-            "name": "Mold Detected",
-            "description": "Mold growth has been detected on the bread. Molds are fungi that produce spores and can spread throughout the bread even if only visible on the surface.",
-            "health_risk": "Consuming moldy bread can lead to allergic reactions, respiratory issues, and digestive problems."
-        }
-    }
-    
-    # Get mold information based on detected type
-    detected_mold_key = mold_types[0].lower().replace(" ", "_") if mold_types[0] != "None" else "default"
-    mold_description = mold_info.get(detected_mold_key, mold_info["default"])
-    
     # Estimate storage time and bread age based on mold coverage
     if coverage_ratio == 0:
         risk = "None"
-        action = "The bread appears fresh with no visible mold. Safe to consume."
+        action = "Safe to eat"
         verdict = "Healthy"
         storage_time = "0-3 days"
         bread_age = "Fresh"
-        storage_tips = "Store in a cool, dry place. Keep in an airtight container or sealed bag."
     elif coverage_ratio < 0.1:
         risk = "Low"
-        action = "Minor mold detected. Do not consume - mold spreads beyond visible areas through invisible spores."
-        verdict = "Not Healthy"
+        action = "Safe to remove moldy part carefully."
+        verdict = "Healthy"
         storage_time = "3-5 days"
         bread_age = "Slightly aged"
-        storage_tips = "Discard the entire loaf. Clean storage area thoroughly to prevent mold spread."
     elif coverage_ratio < 0.3:
         risk = "Moderate"
-        action = "Significant mold contamination detected. Dispose of bread immediately in a sealed bag."
+        action = "Do not eat. Dispose bread safely."
         verdict = "Not Healthy"
         storage_time = "5-7 days"
         bread_age = "Old"
-        storage_tips = "Check other bread products nearby. Clean storage containers with vinegar solution."
     else:
         risk = "Severe"
-        action = "Heavy mold contamination. Dispose immediately and sanitize storage area to prevent spread."
+        action = "Highly contaminated. Dispose immediately."
         verdict = "Not Healthy"
         storage_time = "7+ days"
         bread_age = "Very old"
-        storage_tips = "Inspect all nearby food items. Deep clean storage area with disinfectant."
 
     # Convert to base64
     buffer = io.BytesIO()
@@ -188,8 +156,6 @@ def analyze():
         "mold_type": ", ".join(mold_types),
         "storage_time": storage_time,
         "bread_age": bread_age,
-        "mold_info": mold_description if coverage_ratio > 0 else None,
-        "storage_tips": storage_tips,
         "annotated": f"data:image/jpeg;base64,{encoded_img}"
     })
 

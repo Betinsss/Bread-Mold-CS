@@ -11,7 +11,8 @@ form.addEventListener("submit", async (e) => {
   const formData = new FormData();
   formData.append("image", input.files[0]);
 
-  const res = await fetch("/analyze", {
+  // Call FastAPI backend
+  const res = await fetch("http://localhost:8000/api/analyze", {
     method: "POST",
     body: formData
   });
@@ -57,19 +58,60 @@ form.addEventListener("submit", async (e) => {
 
   // Mold information section
   const moldInfoSection = document.getElementById("mold-info-section");
-  if (data.mold_info) {
+  if (data.mold_information && data.mold_information.trim() !== "" && data.mold_type !== "None") {
     moldInfoSection.classList.remove("hidden");
-    document.getElementById("mold-name").innerText = data.mold_info.name;
-    document.getElementById("mold-description").innerText = data.mold_info.description;
-    document.getElementById("mold-health-risk").innerText = data.mold_info.health_risk;
-    document.getElementById("mold-characteristics").innerText = data.mold_info.characteristics || "";
+    document.getElementById("mold-name").innerText = data.mold_type;
+    
+    const desc = data.mold_information;
+    const sentences = desc.split('. ');
+    
+    // First 2 sentences as description
+    const description = sentences.slice(0, 2).join('. ') + (sentences.length > 2 ? '.' : '');
+    document.getElementById("mold-description").innerText = description;
+    
+    // Extract health risk info (sentences with "risk", "toxic", "allergic", "respiratory")
+    const healthSentences = sentences.filter(s => 
+      s.toLowerCase().includes('risk') || 
+      s.toLowerCase().includes('toxic') || 
+      s.toLowerCase().includes('allergic') || 
+      s.toLowerCase().includes('respiratory') ||
+      s.toLowerCase().includes('infection')
+    );
+    document.getElementById("mold-health-risk").innerText = healthSentences.length > 0 
+      ? healthSentences.join('. ') + '.'
+      : "May cause allergic reactions and respiratory issues in sensitive individuals.";
+    
+    // Extract characteristics (sentences with "appears", "grows", "spreads", "conditions")
+    const charSentences = sentences.filter(s => 
+      s.toLowerCase().includes('appears') || 
+      s.toLowerCase().includes('grows') || 
+      s.toLowerCase().includes('spreads') ||
+      s.toLowerCase().includes('conditions') ||
+      s.toLowerCase().includes('fuzzy') ||
+      s.toLowerCase().includes('spots')
+    );
+    document.getElementById("mold-characteristics").innerText = charSentences.length > 0
+      ? charSentences.join('. ') + '.'
+      : "Characteristics vary by environmental conditions and growth stage.";
   } else {
     moldInfoSection.classList.add("hidden");
   }
 
   // Recommended actions
   document.getElementById("action").innerText = data.action;
-  document.getElementById("storage-tips").innerText = data.storage_tips;
+  // For storage tips, use a generic message or extract from bread type
+  const breadType = data.bread_type.toLowerCase();
+  let storageTips = "Store in a cool, dry place away from direct sunlight.";
+  if (breadType.includes("white")) {
+    storageTips = "Keep in original packaging at room temperature for 5-7 days or freeze for up to 3 months.";
+  } else if (breadType.includes("whole wheat")) {
+    storageTips = "Store in cool, dry place for 3-5 days or refrigerate to extend freshness.";
+  } else if (breadType.includes("sourdough")) {
+    storageTips = "Keep cut-side down on cutting board or in paper bag for 2-3 days.";
+  } else if (breadType.includes("flat")) {
+    storageTips = "Store in airtight container at room temperature for 2-3 days or refrigerate for up to 1 week.";
+  }
+  document.getElementById("storage-tips").innerText = storageTips;
 
   loading.classList.add("hidden");
   result.classList.remove("hidden");

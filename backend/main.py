@@ -137,11 +137,10 @@ async def analyze(file: UploadFile = File(...)):
     }
     
     mold_info_map = {
-        "green mold": "Green mold is typically Penicillium species, one of the most common bread molds. It produces greenish spores and can spread rapidly throughout the bread's internal structure.",
-        "white mold": "White mold represents early-stage fungal growth. While it may appear harmless, the mycelium has likely penetrated deep into the bread's porous structure.",
-        "black mold": "Black mold can include Aspergillus niger or Rhizopus stolonifer. Some species produce mycotoxins that can cause respiratory issues and allergic reactions.",
-        "blue mold": "Blue mold is usually Penicillium roqueforti or related species. While used intentionally in cheese-making, it's not safe for bread consumption.",
-        "mold": "This is a fungal growth that develops on bread when exposed to moisture and warmth. Mold spores can penetrate deep into bread's porous structure."
+        "aspergillus": "Aspergillus is a black or dark-colored mold that can produce harmful mycotoxins. It appears as black, brown, or greenish-black spots on bread. This mold poses a very high risk as it can cause respiratory issues, allergic reactions, and in severe cases, aspergillosis. It thrives in warm, humid conditions and can spread rapidly through bread's porous structure.",
+        "cladosporium": "Cladosporium is an olive-green to brown or black mold commonly found on bread and other food items. It appears as dark green to black velvety patches. While it poses a moderate to high risk, it's one of the most common indoor molds. It can trigger allergies, asthma symptoms, and respiratory issues, especially in sensitive individuals. This mold grows well in both warm and cool conditions.",
+        "penicillium": "Penicillium is a blue-green mold and the most common bread mold species. It appears as blue, green, or white fuzzy growth on the bread surface. This mold poses a high risk as it spreads rapidly throughout the bread's internal structure. While generally not as toxic as some other molds, it can cause allergic reactions and respiratory problems. The spores can easily become airborne and contaminate other food items.",
+        "rhizopus": "Rhizopus, also known as black bread mold, grows quickly in warm, moist conditions. It initially appears as white fuzzy growth that turns black as spores develop. This mold poses a high risk due to its rapid growth rate. It can cause infections (mucormycosis) in immunocompromised individuals and produce toxins. The mold spreads through stolons (horizontal stems) and can quickly contaminate entire loaves."
     }
     
     if coverage_ratio == 0:
@@ -155,8 +154,8 @@ async def analyze(file: UploadFile = File(...)):
     
     mold_rec = ""
     if mold_types[0] != "None":
-        mold_key = mold_types[0].lower().replace('_', ' ')
-        mold_rec = next((v for k, v in mold_info_map.items() if k in mold_key), mold_info_map.get("mold", ""))
+        mold_key = mold_types[0].lower().replace('_', ' ').replace('mold ', '')
+        mold_rec = next((v for k, v in mold_info_map.items() if k in mold_key), "")
     
     max_size = 800
     if w > max_size or h > max_size:

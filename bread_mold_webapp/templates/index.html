@@ -18,106 +18,116 @@
 
     <div id="result" class="hidden">
       <h2>Analysis Results</h2>
-      
+
       <!-- Detection Summary -->
-      <div class="summary-horizontal">
-        <div class="summary-item">
-          <div class="summary-label">Risk Level</div>
-          <div class="summary-value" id="risk"></div>
-        </div>
-        <div class="summary-item">
-          <div class="summary-label">Mold Coverage</div>
-          <div class="summary-value"><span id="coverage"></span>%</div>
-        </div>
-        <div class="summary-item">
-          <div class="summary-label">Bread Type</div>
-          <div class="summary-value" id="bread-type"></div>
-        </div>
-        <div class="summary-item">
-          <div class="summary-label">Mold Type</div>
-          <div class="summary-value" id="mold-type"></div>
+      <div class="section-container">
+        <div class="summary-horizontal">
+          <div class="summary-item">
+            <div class="summary-label">Risk Level</div>
+            <div class="summary-value" id="risk"></div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Mold Coverage</div>
+            <div class="summary-value"><span id="coverage"></span>%</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Bread Type</div>
+            <div class="summary-value" id="bread-type"></div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Mold Type</div>
+            <div class="summary-value" id="mold-type"></div>
+          </div>
         </div>
       </div>
 
       <!-- Image and Verdict Cards-->
-      <div class="main-content">
-        <div class="image-card">
-          <img id="annotated" src="" alt="Annotated Result">
-        </div>
-        <div class="verdict-card">
-          <div class="verdict-label">Final Verdict</div>
-          <div class="verdict-value" id="verdict"></div>
-          <div class="verdict-details">
-            <p><strong>Storage Time:</strong> <span id="storage-time"></span></p>
-            <p><strong>Bread Age:</strong> <span id="bread-age"></span></p>
+      <div class="section-container">
+        <div class="main-content">
+          <div class="image-card">
+            <img id="annotated" src="" alt="Annotated Result">
+          </div>
+          <div class="verdict-card">
+            <div class="verdict-label">Final Verdict</div>
+            <div class="verdict-value" id="verdict"></div>
+            <div class="verdict-details">
+              <p><strong>Storage Time:</strong> <span id="storage-time"></span></p>
+              <p><strong>Bread Age:</strong> <span id="bread-age"></span></p>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Result Breakdown Header-->
-      <div class="section-header">RESULT BREAKDOWN</div>
-      <div class="breakdown-grid">
-        <div class="breakdown-card">
-          <div class="card-icon">🔍</div>
-          <div class="card-title">Detection</div>
-          <div class="card-content">
-            <p><strong>Risk:</strong> <span id="risk-detail"></span></p>
-            <p><strong>Coverage:</strong> <span id="coverage-detail"></span>%</p>
+      <!-- Result Breakdown -->
+      <div class="section-container">
+        <div class="section-header">RESULT BREAKDOWN</div>
+        <div class="breakdown-grid">
+          <div class="breakdown-card">
+            <div class="card-icon">🔍</div>
+            <div class="card-title">Detection</div>
+            <div class="card-content">
+              <p><strong>Risk:</strong> <span id="risk-detail"></span></p>
+              <p><strong>Coverage:</strong> <span id="coverage-detail"></span>%</p>
+            </div>
           </div>
-        <div class="breakdown-card">
-          <div class="card-icon">🍞</div>
-          <div class="card-title">Bread Info</div>
-          <div class="card-content">
-            <p><strong>Type:</strong> <span id="bread-type-detail"></span></p>
-            <p><strong>Age:</strong> <span id="bread-age-detail"></span></p>
+          <div class="breakdown-card">
+            <div class="card-icon">🍞</div>
+            <div class="card-title">Bread Info</div>
+            <div class="card-content">
+              <p><strong>Type:</strong> <span id="bread-type-detail"></span></p>
+              <p><strong>Age:</strong> <span id="bread-age-detail"></span></p>
+            </div>
           </div>
-        <div class="breakdown-card">
-          <div class="card-icon">🦠</div>
-          <div class="card-title">Mold Info</div>
-          <div class="card-content">
-            <p><strong>Type:</strong> <span id="mold-type-detail"></span></p>
-            <p><strong>Storage:</strong> <span id="storage-time-detail"></span></p>
+          <div class="breakdown-card">
+            <div class="card-icon">🦠</div>
+            <div class="card-title">Mold Info</div>
+            <div class="card-content">
+              <p><strong>Type:</strong> <span id="mold-type-detail"></span></p>
+              <p><strong>Storage:</strong> <span id="storage-time-detail"></span></p>
+            </div>
           </div>
-        <div class="breakdown-card">
-          <div class="card-icon">✅</div>
-          <div class="card-title">Status</div>
-          <div class="card-content">
-            <p><strong>Verdict:</strong> <span id="verdict-detail"></span></p>
+          <div class="breakdown-card">
+            <div class="card-icon">✅</div>
+            <div class="card-title">Status</div>
+            <div class="card-content">
+              <p><strong>Verdict:</strong> <span id="verdict-detail"></span></p>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Mold Information Section-->
-      <div class="section-header">MOLD INFORMATION</div>
-      <div id="mold-info-section" class="info-section hidden">
-        <div class="info-container">
-          <h3 id="mold-name"></h3>
-          <p id="mold-description"></p>
-          <div class="health-risk">
-            <strong>⚠️ Health Risk:</strong>
-            <p id="mold-health-risk"></p>
-          </div>
-          <div class="mold-characteristics">
-            <strong>Characteristics:</strong>
-            <p id="mold-characteristics"></p>
+      <div class="section-container">
+        <div class="section-header">MOLD INFORMATION</div>
+        <div id="mold-info-section" class="info-section hidden">
+          <div class="info-container">
+            <h3 id="mold-name"></h3>
+            <p id="mold-description"></p>
+            <div class="health-risk">
+              <strong>⚠️ Health Risk:</strong>
+              <p id="mold-health-risk"></p>
+            </div>
+            <div class="mold-characteristics">
+              <strong>Characteristics:</strong>
+              <p id="mold-characteristics"></p>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Recommended Actions -->
-      <div class="section-header">RECOMMENDED ACTIONS</div>
-      <div class="actions-container">
-        <div class="action-box">
-          <div class="action-title">🎯 Immediate Action</div>
-          <p id="action"></p>
+      <div class="section-container">
+        <div class="section-header">RECOMMENDED ACTIONS</div>
+        <div class="actions-container">
+          <div class="action-box">
+            <div class="action-title">🎯 Immediate Action</div>
+            <p id="action"></p>
+          </div>
+          <div class="action-box">
+            <div class="action-title">💡 Storage Tips</div>
+            <p id="storage-tips"></p>
+          </div>
         </div>
-        <div class="action-box">
-          <div class="action-title">💡 Storage Tips</div>
-          <p id="storage-tips"></p>
-        </div>
-      </div>
-    </div>
-    </div>
       </div>
     </div>
   </div>
