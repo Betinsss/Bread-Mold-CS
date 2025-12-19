@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bread Mold Detection System</title>
+  <link rel="stylesheet" href="/src/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="logo">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V4C20 2.9 19.1 2 18 2Z" fill="#8B5A3C"/>
+          <circle cx="9" cy="8" r="1.5" fill="#A0826D"/>
+          <circle cx="15" cy="11" r="1.5" fill="#A0826D"/>
+          <circle cx="10" cy="14" r="1.5" fill="#A0826D"/>
+          <path d="M6 2C6 2 7 1 12 1C17 1 18 2 18 2" stroke="#C9A88A" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span>Bread Mold Detector</span>
+        <span class="model-badge">YOLOv11</span>
+      </h1>
+      <div class="nav-links">
+        <a href="#" class="nav-link active" data-page="analyze">Analyze</a>
+        <a href="#" class="nav-link" data-page="categories">Categories</a>
+        <a href="#" class="nav-link" data-page="model">Model Info</a>
+        <a href="#" class="nav-link" data-page="history">History</a>
+        <a href="#" class="nav-link" data-page="analytics">Analytics</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <!-- Analyze Page -->
+    <div id="analyze-page" class="page active">
+      <div class="hero-section">
+        <h2>AI-Powered Bread Mold Detection</h2>
+        <p>Upload an image to analyze bread freshness and detect mold contamination</p>
+      </div>
+
+      <div class="upload-section">
+        <div class="upload-card">
+          <input type="file" id="image-input" accept="image/*" hidden>
+          <label for="image-input" class="upload-area">
+            <div class="upload-icon">📸</div>
+            <p class="upload-text">Click to upload or drag and drop</p>
+            <p class="upload-subtext">PNG, JPG up to 10MB</p>
+          </label>
+          <button id="analyze-btn" class="btn-primary" disabled>Analyze Image</button>
+        </div>
+      </div>
+
+      <div id="loading" class="loading hidden">
+        <div class="spinner"></div>
+        <p>Analyzing your image...</p>
+      </div>
+
+      <div id="result" class="result-section hidden">
+        <h3>Analysis Results</h3>
+        
+        <div class="result-layout-single-row">
+          <div class="result-card image-card-balanced">
+            <div class="image-controls">
+              <button id="toggle-labels" class="btn-toggle">Hide Labels</button>
+            </div>
+            <img id="annotated" src="" alt="Annotated Result">
+          </div>
+
+          <div class="result-card status-card-balanced">
+            <div class="verdict-badge" id="verdict-badge">
+              <span id="verdict"></span>
+            </div>
+            <div class="risk-level-center">
+              <span class="risk-label">Risk Level</span>
+              <span class="risk-value" id="risk"></span>
+            </div>
+            <div class="coverage-bar">
+              <div class="coverage-fill" id="coverage-fill"></div>
+              <span class="coverage-text" id="coverage-text"></span>
+            </div>
+          </div>
+          
+          <div class="result-card detection-card-balanced">
+            <h4>Detection Summary</h4>
+            <div class="detection-grid-vertical">
+              <div class="detection-item">
+                <svg class="detection-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V4C20 2.9 19.1 2 18 2Z" fill="#8B5A3C"/>
+                </svg>
+                <div>
+                  <div class="detection-value" id="bread-count">0</div>
+                  <div class="detection-label">Bread Items</div>
+                </div>
+              </div>
+              <div class="detection-item">
+                <svg class="detection-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="8" fill="#A0826D"/>
+                  <circle cx="9" cy="10" r="2" fill="#8B5A3C"/>
+                </svg>
+                <div>
+                  <div class="detection-value" id="mold-count">0</div>
+                  <div class="detection-label">Mold Spots</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="details-grid-compact">
+          <div class="detail-card-compact">
+            <svg class="detail-icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V4C20 2.9 19.1 2 18 2Z" fill="#8B5A3C"/>
+            </svg>
+            <div class="detail-content">
+              <span class="detail-label">Bread Type</span>
+              <span class="detail-value" id="bread-type"></span>
+            </div>
+          </div>
+
+          <div class="detail-card-compact">
+            <svg class="detail-icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="8" fill="#A0826D"/>
+              <circle cx="9" cy="10" r="2" fill="#8B5A3C"/>
+            </svg>
+            <div class="detail-content">
+              <span class="detail-label">Mold Type</span>
+              <span class="detail-value" id="mold-type"></span>
+            </div>
+          </div>
+
+          <div class="detail-card-compact">
+            <svg class="detail-icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="#8B5A3C" stroke-width="2" fill="none"/>
+              <path d="M12 6V12L16 14" stroke="#8B5A3C" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <div class="detail-content">
+              <span class="detail-label">Storage Time</span>
+              <span class="detail-value" id="storage-time"></span>
+            </div>
+          </div>
+
+          <div class="detail-card-compact">
+            <svg class="detail-icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="4" width="16" height="16" rx="2" stroke="#8B5A3C" stroke-width="2" fill="none"/>
+              <path d="M8 2V6M16 2V6M4 10H20" stroke="#8B5A3C" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <div class="detail-content">
+              <span class="detail-label">Bread Age</span>
+              <span class="detail-value"><span id="age-days"></span> days (<span id="bread-age"></span>)</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="mold-info-card" class="mold-info-card hidden">
+          <h4>🔬 Mold Information</h4>
+          <p id="mold-information"></p>
+        </div>
+        
+        <div class="action-card">
+          <h4>💡 Recommended Action</h4>
+          <div id="action" class="action-bullets"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Model Info Page (duplicate removed, kept above) -->
+
+    <!-- History Page -->
+    <div id="history-page" class="page">
+      <div class="page-header">
+        <h2>Analysis History</h2>
+        <button id="clear-history" class="btn-secondary">Clear History</button>
+      </div>
+      <div id="history-list" class="history-list"></div>
+    </div>
+
+    <!-- Categories Page -->
+    <div id="categories-page" class="page">
+      <div class="page-header">
+        <h2>Detection Categories</h2>
+      </div>
+
+      <div class="categories-container">
+        <div class="category-section">
+          <h3>🍞 Bread Types</h3>
+          <div class="category-cards">
+            <div class="category-card">
+              <h4>Flat Bread</h4>
+              <p><strong>Description:</strong> Unleavened or lightly leavened flatbreads like pita, naan, or tortillas</p>
+              <p><strong>Storage Time:</strong> 2-3 days at room temperature</p>
+              <p><strong>Best Storage:</strong> Airtight container or sealed bag</p>
+              <p><strong>Example Age:</strong> Fresh (1 day), Slightly aged (4 days)</p>
+            </div>
+            <div class="category-card">
+              <h4>Quick Bread</h4>
+              <p><strong>Description:</strong> Bread leavened with baking powder/soda like banana bread, muffins, biscuits</p>
+              <p><strong>Storage Time:</strong> 3-4 days at room temperature</p>
+              <p><strong>Best Storage:</strong> Wrapped tightly in plastic wrap</p>
+              <p><strong>Example Age:</strong> Fresh (1 day), Old (6 days)</p>
+            </div>
+            <div class="category-card">
+              <h4>Stuffed Bread</h4>
+              <p><strong>Description:</strong> Bread with fillings like cheese, meat, or vegetables</p>
+              <p><strong>Storage Time:</strong> 1-2 days refrigerated</p>
+              <p><strong>Best Storage:</strong> Refrigerate in airtight container</p>
+              <p><strong>Example Age:</strong> Fresh (1 day), Very old (10+ days)</p>
+            </div>
+            <div class="category-card">
+              <h4>Sweet Bread</h4>
+              <p><strong>Description:</strong> Enriched breads with sugar, eggs, butter like brioche, challah</p>
+              <p><strong>Storage Time:</strong> 4-5 days at room temperature</p>
+              <p><strong>Best Storage:</strong> Bread box or paper bag</p>
+              <p><strong>Example Age:</strong> Slightly aged (4 days), Old (6 days)</p>
+            </div>
+            <div class="category-card">
+              <h4>White Bread</h4>
+              <p><strong>Description:</strong> Standard sandwich bread made with refined wheat flour</p>
+              <p><strong>Storage Time:</strong> 5-7 days at room temperature</p>
+              <p><strong>Best Storage:</strong> Original packaging or bread box</p>
+              <p><strong>Example Age:</strong> Fresh (1 day), Slightly aged (4 days)</p>
+            </div>
+            <div class="category-card">
+              <h4>Wholegrain Bread</h4>
+              <p><strong>Description:</strong> Bread made with whole wheat or multigrain flour</p>
+              <p><strong>Storage Time:</strong> 3-5 days at room temperature</p>
+              <p><strong>Best Storage:</strong> Cool, dry place or refrigerate</p>
+              <p><strong>Example Age:</strong> Slightly aged (4 days), Old (6 days)</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="category-section">
+          <h3>🦠 Mold Types</h3>
+          <div class="category-cards">
+            <div class="category-card mold-card">
+              <h4>Mold Aspergillus</h4>
+              <p><strong>Definition:</strong> Black or dark-colored mold that can produce mycotoxins</p>
+              <p><strong>Appearance:</strong> Black, brown, or greenish-black spots</p>
+              <p><strong>Risk Level:</strong> Very High - potentially toxic</p>
+              <p><strong>Health Impact:</strong> Can cause respiratory issues and allergic reactions</p>
+            </div>
+            <div class="category-card mold-card">
+              <h4>Mold Cladosporium</h4>
+              <p><strong>Definition:</strong> Olive-green to brown or black mold commonly found on bread</p>
+              <p><strong>Appearance:</strong> Dark green to black velvety patches</p>
+              <p><strong>Risk Level:</strong> Moderate to High</p>
+              <p><strong>Health Impact:</strong> Can trigger allergies and asthma symptoms</p>
+            </div>
+            <div class="category-card mold-card">
+              <h4>Mold Penicillium</h4>
+              <p><strong>Definition:</strong> Blue-green mold, most common bread mold species</p>
+              <p><strong>Appearance:</strong> Blue, green, or white fuzzy growth</p>
+              <p><strong>Risk Level:</strong> High - spreads rapidly</p>
+              <p><strong>Health Impact:</strong> Generally not toxic but can cause allergic reactions</p>
+            </div>
+            <div class="category-card mold-card">
+              <h4>Mold Rhizopus</h4>
+              <p><strong>Definition:</strong> Black bread mold that grows quickly in warm conditions</p>
+              <p><strong>Appearance:</strong> White fuzzy growth that turns black with spores</p>
+              <p><strong>Risk Level:</strong> High - rapid growth</p>
+              <p><strong>Health Impact:</strong> Can cause infections in immunocompromised individuals</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="category-section">
+          <h3>📅 Bread Age Classification</h3>
+          <div class="category-cards">
+            <div class="category-card age-card">
+              <h4>Fresh (1 day)</h4>
+              <p><strong>Characteristics:</strong> No mold, optimal quality and texture, soft and moist</p>
+              <p><strong>Storage Time:</strong> 0-3 days</p>
+              <p><strong>Recommendation:</strong> Safe to consume, store properly to maintain freshness</p>
+            </div>
+            <div class="category-card age-card">
+              <h4>Slightly Aged (4 days)</h4>
+              <p><strong>Characteristics:</strong> Minor staleness, minimal mold risk, slightly firmer texture</p>
+              <p><strong>Storage Time:</strong> 3-5 days</p>
+              <p><strong>Recommendation:</strong> Still safe to eat, consider toasting for better texture</p>
+            </div>
+            <div class="category-card age-card">
+              <h4>Old (6 days)</h4>
+              <p><strong>Characteristics:</strong> Noticeable staleness, mold likely present, dry texture</p>
+              <p><strong>Storage Time:</strong> 5-7 days</p>
+              <p><strong>Recommendation:</strong> Inspect carefully for mold before consuming</p>
+            </div>
+            <div class="category-card age-card">
+              <h4>Very Old (10+ days)</h4>
+              <p><strong>Characteristics:</strong> Significant deterioration, high mold risk, hard and dry</p>
+              <p><strong>Storage Time:</strong> 7+ days</p>
+              <p><strong>Recommendation:</strong> Not recommended for consumption, likely contaminated</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Model Info Page -->
+    <div id="model-page" class="page">
+      <div class="page-header">
+        <h2>Model Information</h2>
+      </div>
+      
+      <div class="model-info-card">
+        <h3>🤖 YOLOv11 Object Detection Model (Medium)</h3>
+        <div class="model-metrics">
+          <div class="metric-item">
+            <div class="metric-value">95.8%</div>
+            <div class="metric-label">mAP@50</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-value">98.6%</div>
+            <div class="metric-label">Precision</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-value">94.9%</div>
+            <div class="metric-label">Recall</div>
+          </div>
+        </div>
+        <p class="model-description">Medium-sized YOLOv11 model trained specifically for bread and mold detection with high accuracy and real-time performance. The model achieves excellent precision in identifying both bread types and mold contamination, making it reliable for food safety assessment.</p>
+      </div>
+
+      <div class="model-details-grid">
+        <div class="model-detail-card">
+          <h4>📊 Test Set Performance</h4>
+          <p>The model was evaluated on a comprehensive test set with diverse bread types and mold conditions.</p>
+          <ul>
+            <li><strong>mAP@50:</strong> 95.8% - Mean Average Precision at 50% IoU threshold</li>
+            <li><strong>Precision:</strong> 98.6% - Accuracy of positive predictions</li>
+            <li><strong>Recall:</strong> 94.9% - Ability to find all positive instances</li>
+          </ul>
+        </div>
+
+        <div class="model-detail-card">
+          <h4>🎯 Model Capabilities</h4>
+          <ul>
+            <li>Detects 6 bread types: Flat, Quick, Stuffed, Sweet, White, Wholegrain</li>
+            <li>Identifies 4 mold types: Aspergillus, Cladosporium, Penicillium, Rhizopus</li>
+            <li>Real-time detection with bounding box visualization</li>
+            <li>Calculates mold coverage percentage accurately</li>
+            <li>Estimates bread age and storage time</li>
+          </ul>
+        </div>
+
+        <div class="model-detail-card">
+          <h4>⚙️ Technical Specifications</h4>
+          <ul>
+            <li><strong>Architecture:</strong> YOLOv11 Medium</li>
+            <li><strong>Framework:</strong> Roboflow API</li>
+            <li><strong>Input:</strong> RGB images (any resolution)</li>
+            <li><strong>Confidence Threshold:</strong> 25%</li>
+            <li><strong>Detection Method:</strong> Object detection with bounding boxes</li>
+          </ul>
+        </div>
+
+        <div class="model-detail-card">
+          <h4>🔬 Training Details</h4>
+          <ul>
+            <li>Trained on diverse dataset of bread and mold images</li>
+            <li>Includes various lighting conditions and angles</li>
+            <li>Augmented with rotation, scaling, and color variations</li>
+            <li>Optimized for both accuracy and inference speed</li>
+            <li>Regular updates with new data for improved performance</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics Page -->
+    <div id="analytics-page" class="page">
+      <div class="page-header">
+        <h2>Analytics Dashboard</h2>
+      </div>
+      <div id="analytics-stats" class="analytics-grid"></div>
+      <div class="charts-container">
+        <div class="chart-card">
+          <h3>Risk Distribution</h3>
+          <canvas id="riskChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Verdict Overview</h3>
+          <canvas id="verdictChart"></canvas>
+        </div>
+      </div>
+      <div class="charts-container">
+        <div class="chart-card">
+          <h3>Bread Types Detected</h3>
+          <canvas id="breadChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Mold Types Found</h3>
+          <canvas id="moldChart"></canvas>
+        </div>
+      </div>
+      <div class="charts-container">
+        <div class="chart-card full-width">
+          <h3>Bread Age Distribution</h3>
+          <canvas id="ageChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/src/app.js"></script>
+</body>
+</html>
