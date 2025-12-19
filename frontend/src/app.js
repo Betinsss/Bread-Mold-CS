@@ -44,16 +44,21 @@ analyzeBtn.addEventListener('click', async () => {
   formData.append('file', file);
   
   try {
+    console.log('Connecting to:', `${API_URL}/api/analyze`);
     const response = await fetch(`${API_URL}/api/analyze`, {
       method: 'POST',
       body: formData
     });
     
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
     const data = await response.json();
     displayResults(data);
   } catch (error) {
-    alert('Error analyzing image. Make sure the backend is running.');
-    console.error(error);
+    alert(`Error analyzing image: ${error.message}. Make sure the backend is running on ${API_URL}`);
+    console.error('Full error:', error);
   } finally {
     loading.classList.add('hidden');
   }
@@ -66,36 +71,84 @@ function displayResults(data) {
   currentResult = data;
   showingLabels = true;
   
-  document.getElementById('annotated').src = data.annotated;
-  document.getElementById('verdict').textContent = data.verdict;
-  document.getElementById('risk').textContent = data.risk;
-  document.getElementById('bread-type').textContent = data.bread_type;
-  document.getElementById('mold-type').textContent = data.mold_type;
-  document.getElementById('storage-time').textContent = data.storage_time;
-  document.getElementById('bread-age').textContent = data.bread_age;
-  document.getElementById('age-days').textContent = data.age_days;
-  document.getElementById('action').textContent = data.action;
+  // Image and basic info
+  const annotatedImg = document.getElementById('annotated');
+  const verdictEl = document.getElementById('verdict');
   
-  const moldInfoCard = document.getElementById('mold-info-card');
-  const moldInfoText = document.getElementById('mold-information');
-  if (data.mold_information && data.mold_information.trim() !== '') {
-    moldInfoText.textContent = data.mold_information;
-    moldInfoCard.classList.remove('hidden');
+  if (annotatedImg) annotatedImg.src = data.annotated;
+  if (verdictEl) verdictEl.textContent = data.verdict;
+  
+  // Detection summary (horizontal)
+  const breadCountEl = document.getElementById('bread-count');
+  const moldCountEl = document.getElementById('mold-count');
+  const riskEl = document.getElementById('risk');
+  
+  if (breadCountEl) breadCountEl.textContent = data.detections_count.bread;
+  if (moldCountEl) moldCountEl.textContent = data.detections_count.mold;
+  if (riskEl) riskEl.textContent = data.risk;
+  
+  // Coverage bar
+  const coverageFill = document.getElementById('coverage-fill');
+  const coverageText = document.getElementById('coverage-text');
+  
+  if (coverageFill) coverageFill.style.width = `${data.coverage}%`;
+  if (coverageText) coverageText.textContent = `${data.coverage}%`;
+  
+  // Verdict card details
+  const verdictStatus = document.getElementById('verdict-status');
+  const riskDisplay = document.getElementById('risk-display');
+  const coverageDisplay = document.getElementById('coverage-display');
+  
+  if (verdictStatus) verdictStatus.textContent = data.verdict;
+  if (riskDisplay) riskDisplay.textContent = data.risk;
+  if (coverageDisplay) coverageDisplay.textContent = `${data.coverage}%`;
+  
+  // Result breakdown
+  const breadTypeEl = document.getElementById('bread-type');
+  const moldTypeEl = document.getElementById('mold-type');
+  const storageTimeEl = document.getElementById('storage-time');
+  const breadAgeEl = document.getElementById('bread-age');
+  const ageDaysEl = document.getElementById('age-days');
+  
+  if (breadTypeEl) breadTypeEl.textContent = data.bread_type;
+  if (moldTypeEl) moldTypeEl.textContent = data.mold_type;
+  if (storageTimeEl) storageTimeEl.textContent = data.storage_time;
+  if (breadAgeEl) breadAgeEl.textContent = data.bread_age;
+  if (ageDaysEl) ageDaysEl.textContent = data.age_days;
+  
+  // Mold information section
+  const moldInfoSection = document.getElementById('mold-info-section');
+  const moldInfoList = document.getElementById('mold-information-list');
+  if (data.mold_type !== 'None' && data.coverage > 0) {
+    const moldDescriptions = {
+      'Mold Aspergillus': 'Black or dark-colored mold that produces mycotoxins. Forms in warm, humid conditions and appears as black, brown, or greenish-black spots.',
+      'Mold Cladosporium': 'Olive-green to brown mold commonly found on bread. Develops in moist environments and appears as dark green to black velvety patches.',
+      'Mold Penicillium': 'Blue-green mold, the most common bread mold species. Grows rapidly in humid conditions and appears as blue, green, or white fuzzy growth.',
+      'Mold Rhizopus': 'Black bread mold that grows quickly in warm conditions. Starts as white fuzzy growth that turns black as spores develop.'
+    };
+    
+    const moldDesc = moldDescriptions[data.mold_type] || 'Fungal growth that develops on bread when exposed to moisture and warmth. Mold spores can penetrate deep into the bread\'s porous structure.';
+    
+    moldInfoList.innerHTML = `
+      <li><strong>Mold Type:</strong> ${data.mold_type}</li>
+      <li><strong>Coverage:</strong> ${data.coverage}% of bread surface affected</li>
+      <li><strong>Description:</strong> ${moldDesc}</li>
+    `;
+    moldInfoSection.classList.remove('hidden');
   } else {
-    moldInfoCard.classList.add('hidden');
+    moldInfoSection.classList.add('hidden');
   }
   
-  document.getElementById('bread-count').textContent = data.detections_count.bread;
-  document.getElementById('mold-count').textContent = data.detections_count.mold;
+  // Actions
+  const actionEl = document.getElementById('action');
+  if (actionEl) actionEl.textContent = data.action;
   
+  // Verdict badge styling
   const verdictBadge = document.getElementById('verdict-badge');
   verdictBadge.className = 'verdict-badge';
   verdictBadge.classList.add(data.verdict === 'Healthy' ? 'healthy' : 'unhealthy');
   
-  const coverageFill = document.getElementById('coverage-fill');
-  coverageFill.style.width = `${data.coverage}%`;
-  document.getElementById('coverage-text').textContent = `${data.coverage}% Coverage`;
-  
+  // Toggle labels button
   document.getElementById('toggle-labels').textContent = 'Hide Labels';
   
   result.classList.remove('hidden');
