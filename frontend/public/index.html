@@ -59,107 +59,134 @@
       <div id="result" class="result-section hidden">
         <h3>Analysis Results</h3>
         
-        <div class="result-layout-single-row">
-          <div class="result-card image-card-balanced">
+        <!-- Detection Summary - Single Row -->
+        <div style="display: flex; align-items: center; gap: 15px; margin: 0 0 20px 0; font-size: 14px;">
+          <span style="font-weight: 600; color: #495057;">Detection Summary:</span>
+          <div style="display: flex; align-items: center; gap: 6px; background: white; padding: 6px 10px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #dee2e6;">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px;">
+              <path d="M18 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V4C20 2.9 19.1 2 18 2Z" fill="#8B5A3C"/>
+            </svg>
+            <span style="color: #8B5A3C; font-weight: 500;">Bread Items: <strong id="bread-count">0</strong></span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px; background: white; padding: 6px 10px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #dee2e6;">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px;">
+              <circle cx="12" cy="12" r="8" fill="#A0826D"/>
+              <circle cx="9" cy="10" r="2" fill="#8B5A3C"/>
+            </svg>
+            <span style="color: #A0826D; font-weight: 500;">Mold Numbers: <strong id="mold-count">0</strong></span>
+          </div>
+        </div>
+
+        <!-- Main Content - Image and Verdict -->
+        <div class="main-content-grid">
+          <div class="result-card image-card">
             <div class="image-controls">
               <button id="toggle-labels" class="btn-toggle">Hide Labels</button>
             </div>
             <img id="annotated" src="" alt="Annotated Result">
           </div>
 
-          <div class="result-card status-card-balanced">
+          <div class="result-card verdict-card">
             <div class="verdict-badge" id="verdict-badge">
               <span id="verdict"></span>
             </div>
-            <div class="risk-level-center">
-              <span class="risk-label">Risk Level</span>
-              <span class="risk-value" id="risk"></span>
-            </div>
-            <div class="coverage-bar">
-              <div class="coverage-fill" id="coverage-fill"></div>
-              <span class="coverage-text" id="coverage-text"></span>
-            </div>
-          </div>
-          
-          <div class="result-card detection-card-balanced">
-            <h4>Detection Summary</h4>
-            <div class="detection-grid-vertical">
-              <div class="detection-item">
-                <svg class="detection-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M18 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V4C20 2.9 19.1 2 18 2Z" fill="#8B5A3C"/>
-                </svg>
-                <div>
-                  <div class="detection-value" id="bread-count">0</div>
-                  <div class="detection-label">Bread Items</div>
-                </div>
+            <div class="verdict-details">
+              <div class="verdict-item">
+                <span class="verdict-label">Status</span>
+                <span class="verdict-value" id="verdict-status"></span>
               </div>
-              <div class="detection-item">
-                <svg class="detection-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="8" fill="#A0826D"/>
-                  <circle cx="9" cy="10" r="2" fill="#8B5A3C"/>
-                </svg>
-                <div>
-                  <div class="detection-value" id="mold-count">0</div>
-                  <div class="detection-label">Mold Spots</div>
-                </div>
+              <div class="verdict-item">
+                <span class="verdict-label">Risk Level</span>
+                <span class="verdict-value" id="risk-display"></span>
+              </div>
+              <div class="verdict-item">
+                <span class="verdict-label">Coverage</span>
+                <span class="verdict-value" id="coverage-display"></span>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="details-grid-compact">
-          <div class="detail-card-compact">
-            <svg class="detail-icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Result Breakdown Section -->
+        <div class="section-header">
+          <h3 class="section-title-large">RESULT BREAKDOWN</h3>
+        </div>
+
+        <div class="breakdown-grid">
+          <div class="breakdown-card">
+            <svg class="breakdown-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M18 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V4C20 2.9 19.1 2 18 2Z" fill="#8B5A3C"/>
             </svg>
-            <div class="detail-content">
-              <span class="detail-label">Bread Type</span>
-              <span class="detail-value" id="bread-type"></span>
+            <div class="breakdown-content">
+              <span class="breakdown-label">Bread Type</span>
+              <span class="breakdown-value" id="bread-type"></span>
             </div>
           </div>
 
-          <div class="detail-card-compact">
-            <svg class="detail-icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <div class="breakdown-card">
+            <svg class="breakdown-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="12" cy="12" r="8" fill="#A0826D"/>
               <circle cx="9" cy="10" r="2" fill="#8B5A3C"/>
             </svg>
-            <div class="detail-content">
-              <span class="detail-label">Mold Type</span>
-              <span class="detail-value" id="mold-type"></span>
+            <div class="breakdown-content">
+              <span class="breakdown-label">Mold Type</span>
+              <span class="breakdown-value" id="mold-type"></span>
             </div>
           </div>
 
-          <div class="detail-card-compact">
-            <svg class="detail-icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <div class="breakdown-card">
+            <svg class="breakdown-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="12" cy="12" r="10" stroke="#8B5A3C" stroke-width="2" fill="none"/>
               <path d="M12 6V12L16 14" stroke="#8B5A3C" stroke-width="2" stroke-linecap="round"/>
             </svg>
-            <div class="detail-content">
-              <span class="detail-label">Storage Time</span>
-              <span class="detail-value" id="storage-time"></span>
+            <div class="breakdown-content">
+              <span class="breakdown-label">Storage Time</span>
+              <span class="breakdown-value" id="storage-time"></span>
             </div>
           </div>
 
-          <div class="detail-card-compact">
-            <svg class="detail-icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <div class="breakdown-card">
+            <svg class="breakdown-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect x="4" y="4" width="16" height="16" rx="2" stroke="#8B5A3C" stroke-width="2" fill="none"/>
               <path d="M8 2V6M16 2V6M4 10H20" stroke="#8B5A3C" stroke-width="2" stroke-linecap="round"/>
             </svg>
-            <div class="detail-content">
-              <span class="detail-label">Bread Age</span>
-              <span class="detail-value"><span id="age-days"></span> days (<span id="bread-age"></span>)</span>
+            <div class="breakdown-content">
+              <span class="breakdown-label">Bread Age</span>
+              <span class="breakdown-value"><span id="age-days"></span> days (<span id="bread-age"></span>)</span>
             </div>
           </div>
         </div>
 
-        <div id="mold-info-card" class="mold-info-card hidden">
-          <h4>🔬 Mold Information</h4>
-          <p id="mold-information"></p>
+        <!-- Mold Information Section -->
+        <div id="mold-info-section" class="info-section hidden">
+          <div class="section-header">
+            <h4 class="section-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline; margin-right: 8px;">
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                <path d="M12 1v6m0 8v6m11-7h-6m-8 0H1" stroke="currentColor" stroke-width="2"/>
+              </svg>
+              Mold Information
+            </h4>
+          </div>
+          <div class="info-card">
+            <ul id="mold-information-list" class="mold-info-list"></ul>
+          </div>
         </div>
         
-        <div class="action-card">
-          <h4>💡 Recommended Action</h4>
-          <div id="action" class="action-bullets"></div>
+        <!-- Recommended Actions Section -->
+        <div class="info-section">
+          <div class="section-header">
+            <h4 class="section-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline; margin-right: 8px;">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                <path d="M12 6l0 6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              Recommended Actions
+            </h4>
+          </div>
+          <div class="info-card">
+            <div id="action" class="action-content"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -183,7 +210,13 @@
 
       <div class="categories-container">
         <div class="category-section">
-          <h3>🍞 Bread Types</h3>
+          <h3>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline; margin-right: 8px; vertical-align: middle;">
+              <path d="M18 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V4C20 2.9 19.1 2 18 2Z" fill="currentColor"/>
+              <path d="M6 2C6 2 7 1 12 1C17 1 18 2 18 2" stroke="#C9A88A" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Bread Types
+          </h3>
           <div class="category-cards">
             <div class="category-card">
               <h4>Flat Bread</h4>
@@ -231,7 +264,15 @@
         </div>
 
         <div class="category-section">
-          <h3>🦠 Mold Types</h3>
+          <h3>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline; margin-right: 8px; vertical-align: middle;">
+              <circle cx="12" cy="12" r="8" fill="currentColor" opacity="0.7"/>
+              <circle cx="9" cy="10" r="2" fill="currentColor"/>
+              <circle cx="15" cy="14" r="1.5" fill="currentColor"/>
+              <circle cx="7" cy="15" r="1" fill="currentColor"/>
+            </svg>
+            Mold Types
+          </h3>
           <div class="category-cards">
             <div class="category-card mold-card">
               <h4>Mold Aspergillus</h4>
@@ -265,7 +306,14 @@
         </div>
 
         <div class="category-section">
-          <h3>📅 Bread Age Classification</h3>
+          <h3>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline; margin-right: 8px; vertical-align: middle;">
+              <rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="2" fill="none"/>
+              <path d="M8 2V6M16 2V6M4 10H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="12" cy="14" r="2" fill="currentColor"/>
+            </svg>
+            Bread Age Classification
+          </h3>
           <div class="category-cards">
             <div class="category-card age-card">
               <h4>Fresh (1 day)</h4>
@@ -303,7 +351,16 @@
       </div>
       
       <div class="model-info-card">
-        <h3>🤖 YOLOv11 Object Detection Model (Medium)</h3>
+        <h3>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline; margin-right: 8px; vertical-align: middle;">
+            <rect x="4" y="4" width="16" height="16" rx="2" stroke="white" stroke-width="2" fill="none"/>
+            <circle cx="8" cy="8" r="1.5" fill="white"/>
+            <circle cx="16" cy="8" r="1.5" fill="white"/>
+            <path d="M8 14h8" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="12" cy="12" r="8" stroke="white" stroke-width="1" opacity="0.3"/>
+          </svg>
+          YOLOv11 Object Detection Model (Medium)
+        </h3>
         <div class="model-metrics">
           <div class="metric-item">
             <div class="metric-value">95.8%</div>
@@ -323,7 +380,13 @@
 
       <div class="model-details-grid">
         <div class="model-detail-card">
-          <h4>📊 Test Set Performance</h4>
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline; margin-right: 8px; vertical-align: middle;">
+              <path d="M3 3v18h18" stroke="currentColor" stroke-width="2"/>
+              <path d="M7 14l4-4 3 3 5-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Test Set Performance
+          </h4>
           <p>The model was evaluated on a comprehensive test set with diverse bread types and mold conditions.</p>
           <ul>
             <li><strong>mAP@50:</strong> 95.8% - Mean Average Precision at 50% IoU threshold</li>
@@ -333,7 +396,14 @@
         </div>
 
         <div class="model-detail-card">
-          <h4>🎯 Model Capabilities</h4>
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline; margin-right: 8px; vertical-align: middle;">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+              <circle cx="12" cy="12" r="6" stroke="currentColor" stroke-width="2" fill="none"/>
+              <circle cx="12" cy="12" r="2" fill="currentColor"/>
+            </svg>
+            Model Capabilities
+          </h4>
           <ul>
             <li>Detects 6 bread types: Flat, Quick, Stuffed, Sweet, White, Wholegrain</li>
             <li>Identifies 4 mold types: Aspergillus, Cladosporium, Penicillium, Rhizopus</li>
@@ -344,7 +414,14 @@
         </div>
 
         <div class="model-detail-card">
-          <h4>⚙️ Technical Specifications</h4>
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline; margin-right: 8px; vertical-align: middle;">
+              <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+              <path d="M12 1v4m0 14v4m11-11h-4m-14 0H1" stroke="currentColor" stroke-width="2"/>
+              <path d="M18.4 5.6l-2.8 2.8m-7.2 7.2l-2.8 2.8m12.8 0l-2.8-2.8m-7.2-7.2L5.6 5.6" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Technical Specifications
+          </h4>
           <ul>
             <li><strong>Architecture:</strong> YOLOv11 Medium</li>
             <li><strong>Framework:</strong> Roboflow API</li>
@@ -355,7 +432,13 @@
         </div>
 
         <div class="model-detail-card">
-          <h4>🔬 Training Details</h4>
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline; margin-right: 8px; vertical-align: middle;">
+              <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" stroke-width="2" fill="none"/>
+              <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Training Details
+          </h4>
           <ul>
             <li>Trained on diverse dataset of bread and mold images</li>
             <li>Includes various lighting conditions and angles</li>
@@ -401,6 +484,26 @@
       </div>
     </div>
   </main>
+
+  <!-- Footer -->
+  <footer style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-top: 1px solid #dee2e6; padding: 15px 0; margin-top: 40px; text-align: center; font-family: 'Space Grotesk', sans-serif;">
+    <div style="max-width: 1000px; margin: 0 auto; color: #495057; font-size: 13px;">
+      <div style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap;">
+        <span style="font-weight: 600;">Section: BSCS-4A</span>
+        <span>|</span>
+        <span>CSST 106 - Computer Vision</span>
+        <span>|</span>
+        <span style="font-weight: 600;">Group 1</span>
+        <span>|</span>
+        <span style="font-weight: 600;">Members:</span>
+        <span>Lat, Betina Grace C.</span>
+        <span>•</span>
+        <span>Montesa, Rosemarie D.</span>
+        <span>•</span>
+        <span>Pino, Renalyn N.</span>
+      </div>
+    </div>
+  </footer>
 
   <script src="/src/app.js"></script>
 </body>
