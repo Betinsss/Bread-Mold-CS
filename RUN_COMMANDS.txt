@@ -1,0 +1,57 @@
+===========================================
+BREAD MOLD DETECTION SYSTEM - RUN COMMANDS
+===========================================
+
+OPTION 1: FastAPI + Node.js (Full System)
+------------------------------------------
+
+STEP 1 - Backend (Terminal 1):
+cd backend
+pip install fastapi uvicorn pillow requests python-dotenv
+python main.py
+
+STEP 2 - Frontend (Terminal 2 - Command Prompt):
+cd frontend
+npm install
+npm start
+
+STEP 3 - Open Browser:
+http://localhost:3000
+
+
+OPTION 2: Flask App (Simple Alternative)
+-----------------------------------------
+
+STEP 1 - Run Flask (Terminal):
+cd bread_mold_webapp
+pip install flask pillow requests
+python app.py
+
+STEP 2 - Open Browser:
+http://localhost:5000
+
+
+TROUBLESHOOTING
+---------------
+
+PowerShell Issue:
+- Use Command Prompt (cmd) instead of PowerShell
+- OR run: Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+Port Already in Use:
+- Backend: Change port in main.py (line: uvicorn.run(app, port=8000))
+- Frontend: Change port in server.js (line: app.listen(3000))
+
+Missing Dependencies:
+- Backend: pip install -r backend/requirements.txt
+- Frontend: npm install (in frontend folder)
+
+
+FEATURES
+--------
+✓ AI-powered mold detection
+✓ Interactive analytics dashboard
+✓ Analysis history tracking
+✓ Modern responsive UI
+✓ Smart recommendations
+✓ Label toggle functionality
