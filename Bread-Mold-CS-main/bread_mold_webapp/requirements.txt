@@ -1,4 +1,0 @@
-Flask
-roboflow
-Pillow
-opencv-python-headless
